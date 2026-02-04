@@ -1,0 +1,8 @@
+{
+  "name": "Ciatos People - Inteligência Estratégica",
+  "description": "Sistema avançado de gestão de pessoas, recrutamento e desenvolvimento humano focado em conformidade legal e crescimento estratégico para o Grupo Ciatos.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
