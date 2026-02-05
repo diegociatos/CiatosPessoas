@@ -11,36 +11,102 @@ export enum EmployeeStatus {
   ONBOARDING = 'Onboarding',
   VACATION = 'Férias',
   LEAVE = 'Afastado',
-  OFFBOARDED = 'Desligado'
+  OFFBOARDED = 'Desligado',
+  PENDING_FIRST_ACCESS = 'Aguardando Primeiro Acesso'
 }
 
-export type FeedbackType = 'Contínuo' | 'Formal' | 'Corretivo' | 'Reconhecimento';
+export enum UserRole {
+  ADMIN = 'Administrador Global',
+  MANAGER = 'Gestor',
+  HR = 'RH',
+  EMPLOYEE = 'Colaborador'
+}
+
+export interface SystemUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  unit?: BusinessUnit;
+  lastLogin?: string;
+  isActive: boolean;
+}
+
+export interface AdminLog {
+  id: string;
+  timestamp: string;
+  userId: string;
+  userName: string;
+  action: string;
+  resource: string;
+  ipAddress: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+export interface FeedbackType {
+  id: string;
+  label: string;
+  color: string;
+}
 
 export interface FeedbackEntry {
   id: string;
   date: string;
   author: string;
-  type: FeedbackType;
+  type: string;
   context: string;
   behavior: string;
-  impact: string;
+  impactTechnical: string;
+  impactBehavioral: string;
+  impactCultural: string;
   futureGuidance: string;
 }
 
-export type DocumentCategory = 'Admissional' | 'Contratual' | 'Saúde' | 'Treinamentos' | 'Avaliações';
-export type DocumentStatus = 'Válido' | 'Pendente' | 'Vencido';
+export interface MoodEntry {
+  date: string;
+  score: number;
+  note?: string;
+}
+
+export type TimelineEventType = 'Positivo' | 'Negativo' | 'Neutro' | 'Advertência' | 'Elogio' | 'Feedback';
+export type TimelineCategory = 'Comportamento' | 'Entrega' | 'Prazos' | 'Relacionamento' | 'Compliance';
+
+export interface TimelineEvent {
+  id: string;
+  date: string;
+  type: TimelineEventType;
+  category: TimelineCategory;
+  description: string;
+  author: string;
+  isPrivate?: boolean;
+}
+
+export interface MonthlyDocStatus {
+  month: string;
+  year: number;
+  holerite: 'OK' | 'Pendente' | 'Atrasado';
+  ponto: 'OK' | 'Pendente' | 'Atrasado';
+  recibos: 'OK' | 'Pendente' | 'Atrasado';
+  outros: 'OK' | 'N/A' | 'Pendente';
+}
+
+export type DocumentCategory = 'Admissional' | 'Contratual' | 'Saúde' | 'Treinamentos' | 'Avaliações' | 'Mensal';
+export type DocumentStatus = 'Válido' | 'Pendente' | 'Vencido' | 'Em Analise';
 
 export interface EmployeeDocument {
+  id: string;
   name: string;
   category: DocumentCategory;
+  type: 'Holerite' | 'Ponto' | 'Recibo' | 'ASO' | 'Contrato' | 'Outro';
+  competence?: string; // MM/YYYY
   status: DocumentStatus;
-  date: string;
-  expiryDate?: string;
-  riskNote?: string;
+  uploadDate: string;
+  fileUrl?: string;
+  iaNotes?: string;
 }
 
 export interface BehavioralProfile {
-  disc: { d: number; i: number; s: number; c: number };
+  disc: { subject: string; A: number; fullMark: number }[];
   appreciationLanguage: string;
   communicationStyle: string;
   learningStyle: string;
@@ -51,31 +117,6 @@ export interface ManagerGuide {
   howToCommunicate: string[];
   howToMotivate: string[];
   howToFeedback: string[];
-}
-
-export interface JobOpening {
-  id: string;
-  unit: BusinessUnit;
-  title: string;
-  department: string;
-  seniority: 'Estágio' | 'Júnior' | 'Pleno' | 'Sênior' | 'Especialista';
-  status: 'Aberto' | 'Pausado' | 'Concluído';
-  requirements: {
-    tech: string[];
-    behavioral: string[];
-  };
-  matchProfile: string;
-}
-
-export interface Candidate {
-  id: string;
-  name: string;
-  position: string;
-  matchScore: number;
-  stage: 'Sourcing' | 'Triagem' | 'Entrevista' | 'Técnico' | 'Proposta';
-  lastActivity: string;
-  techSkills: string[];
-  behavioralAlert?: string;
 }
 
 export interface Employee {
@@ -90,12 +131,66 @@ export interface Employee {
   hiringDate: string;
   email: string;
   phone: string;
+  photoUrl?: string;
+  
+  personal: {
+    cpf: string;
+    rg: string;
+    birthDate: string;
+    address: {
+      street: string;
+      number: string;
+      city: string;
+      state: string;
+      zip: string;
+    }
+  };
+  banking: {
+    bank: string;
+    agency: string;
+    account: string;
+    pix?: string;
+  };
+  credentials: {
+    tempLogin: string;
+    tempPass: string;
+    inviteLink: string;
+    needsPasswordChange: boolean;
+  };
+
   behavioral: BehavioralProfile;
   managerGuide: ManagerGuide;
-  emotionalTrend: { day: string; val: number }[];
+  emotionalTrend: MoodEntry[];
   documents: EmployeeDocument[];
+  monthlyCompliance: MonthlyDocStatus[];
+  eventTimeline: TimelineEvent[];
   trainingHistory: { title: string; date: string; score: number }[];
   feedbackHistory: FeedbackEntry[];
   managerNotes: string;
   riskAlert?: string;
+}
+
+export interface Candidate {
+  id: string;
+  name: string;
+  position: string;
+  matchScore: number;
+  stage: 'Sourcing' | 'Triagem' | 'Entrevista' | 'Técnico' | 'Proposta';
+  lastActivity: string;
+  techSkills: string[];
+  behavioralAlert?: string;
+}
+
+export interface JobOpening {
+  id: string;
+  unit: BusinessUnit;
+  title: string;
+  department: string;
+  seniority: 'Estágio' | 'Júnior' | 'Pleno' | 'Sênior' | 'Especialista';
+  status: 'Aberto' | 'Pausado' | 'Concluído';
+  requirements: {
+    tech: string[];
+    behavioral: string[];
+  };
+  matchProfile: string;
 }
