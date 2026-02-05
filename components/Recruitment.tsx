@@ -6,224 +6,245 @@ import {
   Download, Sparkles, BrainCircuit, X, CheckCircle,
   FileText, TrendingUp, Info, RefreshCw, Building2, BarChart3, Clock,
   Layout, MessageSquare, Code, Copy, ClipboardCheck, ListChecks,
-  CheckCircle2, Globe, ShieldCheck, Link2
+  CheckCircle2, Globe, ShieldCheck, Link2, UserCheck, ArrowUpRight,
+  Handshake, LayoutGrid, DollarSign, Users2
 } from 'lucide-react';
 import { Candidate, JobOpening, BusinessUnit } from '../types';
-import { generateJobDescription, generateScreeningQuestions } from '../services/geminiService';
+import { useNavigate } from 'react-router-dom';
 
 const MOCK_JOBS: any[] = [
   { 
     id: '1', 
     unit: BusinessUnit.CONTABILIDADE,
-    title: 'Analista Fiscal', 
+    title: 'Analista Fiscal Sênior', 
     department: 'Fiscal', 
-    seniority: 'Pleno', 
+    seniority: 'Sênior', 
     status: 'Aberto',
-    type: 'Grupo Ciatos',
-    applicants: 24,
-    requirements: { 
-      tech: ['SPED Fiscal', 'Escrituração Contábil'], 
-      behavioral: ['Atenção a detalhes'] 
-    },
-    matchProfile: 'Buscamos alguém com perfil estável e analítico.'
+    type: 'Interno',
+    category: 'Custo',
+    applicants: 14,
+    fee: 'N/A'
   },
   { 
     id: '2', 
-    unit: 'Cliente Externo: Alpha S/A',
+    unit: 'Indústria Têxtil Alpha',
     title: 'Gerente Financeiro', 
     department: 'Financeiro', 
     seniority: 'Sênior', 
     status: 'Aberto',
-    type: 'Externo',
-    applicants: 12,
-    requirements: { tech: ['Controladoria', 'M&A'], behavioral: ['Liderança'] },
-    matchProfile: 'Foco em alguém com senioridade para reestruturação financeira.'
+    type: 'Cliente Externo',
+    category: 'Receita (Fee)',
+    applicants: 32,
+    fee: 'R$ 15.000,00'
   }
 ];
 
-const MOCK_CANDIDATES: Candidate[] = [
-  { id: '1', name: 'Juliana Torres', position: 'Analista Fiscal Pleno', matchScore: 95, stage: 'Triagem', techSkills: ['SPED', 'Lucro Presumido'], lastActivity: 'Ontem', behavioralAlert: 'Altíssimo fit técnico com as obrigações acessórias da unidade.' },
-  { id: '2', name: 'Fernando Lima', position: 'Contador Jr', matchScore: 82, stage: 'Entrevista', techSkills: ['Excel Avançado'], lastActivity: 'Hoje', behavioralAlert: 'Perfil promissor, necessita treinamento em SPED Contribuições.' },
+const MOCK_CANDIDATES: any[] = [
+  { id: '1', name: 'Juliana Torres', position: 'Gerente Financeiro', matchScore: 92, stage: 'Triagem', source: 'LinkedIn', unit: 'Alpha S/A' },
+  { id: '2', name: 'Fernando Lima', position: 'Analista Fiscal Sênior', matchScore: 88, stage: 'Técnico', source: 'Indicação', unit: 'Ciatos Contabilidade' },
 ];
 
 const Recruitment: React.FC = () => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'vagas' | 'candidatos'>('vagas');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiVagaData, setAiVagaData] = useState<string | null>(null);
-  const [aiScreeningData, setAiScreeningData] = useState<string | null>(null);
-  const [activeAiTab, setActiveAiTab] = useState<'visual' | 'json' | 'linkedin' | 'screening'>('visual');
+  const [activeTab, setActiveTab] = useState<'vagas' | 'triagem'>('vagas');
   
   const [vagaForm, setVagaForm] = useState({ 
-    role: 'Analista Fiscal', 
-    unit: BusinessUnit.CONTABILIDADE, 
+    role: '', 
     type: 'Grupo Ciatos',
-    dept: 'Fiscal',
+    category: 'Interna',
     senioridade: 'Pleno',
-    modelo: 'Híbrido'
   });
 
-  const handleRequestJobAi = async () => {
-    setAiLoading(true);
-    setAiScreeningData(null);
-    const details = {
-      empresa: vagaForm.unit,
-      tipo_vaga: vagaForm.type,
-      senioridade: vagaForm.senioridade,
-      modelo_trabalho: vagaForm.modelo,
-      requisitos_obrigatorios: ["experiência com rotinas fiscais", "conhecimento em SPED", "organização"],
-      desejaveis: ["experiência em escritório contábil"],
-      competencias_comportamentais: ["atenção a detalhes", "responsabilidade"]
-    };
-    
-    const suggestion = await generateJobDescription(vagaForm.role, vagaForm.unit, vagaForm.dept, details);
-    setAiVagaData(suggestion);
-
-    const screening = await generateScreeningQuestions({
-      cargo: vagaForm.role,
-      unidade: vagaForm.unit,
-      requisitos_obrigatorios: details.requisitos_obrigatorios
-    });
-    setAiScreeningData(screening);
-
-    setAiLoading(false);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert("Link de Inscrição/Texto copiado!");
-  };
-
   return (
-    <div className="space-y-10 animate-in fade-in duration-500 pb-12">
-      <div className="flex justify-between items-end">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-black text-ciatos-navy tracking-tight">Recrutamento Inteligente</h2>
-          <p className="text-sm text-gray-500 font-medium italic">Painel Global de Talentos para o Grupo e Clientes Externos.</p>
+    <div className="space-y-10 animate-in fade-in pb-16">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-10 bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-80 h-80 bg-slate-50 rounded-full translate-x-40 -translate-y-40" />
+        <div className="relative z-10 flex items-center gap-8">
+           <div className="p-6 ciatos-navy rounded-3xl text-ciatos-gold shadow-2xl border-4 border-white">
+              <Users2 size={40} />
+           </div>
+           <div>
+              <h2 className="text-3xl font-black text-ciatos-navy tracking-tight uppercase leading-none">Curadoria & Talent Hub</h2>
+              <p className="text-lg text-gray-500 font-medium italic mt-2">Gestão de Talentos Internos e Vagas de Recrutamento Externo.</p>
+           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 relative z-10">
            <button 
              onClick={() => setIsModalOpen(true)}
-             className="flex items-center gap-3 px-8 py-4 ciatos-navy text-white rounded-2xl text-[10px] font-black shadow-xl hover:scale-105 transition-all uppercase tracking-[0.2em]"
+             className="px-10 py-5 ciatos-navy text-white rounded-[2rem] text-[11px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center gap-3"
            >
-             <Plus size={18} /> Nova Vaga Estratégica
+             <Plus size={18} /> Criar Nova Vaga
            </button>
         </div>
       </div>
 
-      <div className="flex gap-8 border-b border-gray-100">
-        <TabBtn label="Painel de Vagas" count={MOCK_JOBS.length} active={activeTab === 'vagas'} onClick={() => setActiveTab('vagas')} />
-        <TabBtn label="Pipeline de Talentos (Ranking IA)" count={MOCK_CANDIDATES.length} active={activeTab === 'candidatos'} onClick={() => setActiveTab('candidatos')} />
+      {/* ADVISOR DE TRIAGEM ATIVA */}
+      <div className="bg-ciatos-navy p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden border-l-[16px] border-l-ciatos-gold flex flex-col md:flex-row items-center gap-10">
+         <Sparkles className="absolute top-[-20px] right-[-20px] text-white/5 w-64 h-64" />
+         <div className="p-6 bg-ciatos-gold rounded-[2.5rem] shadow-xl relative z-10 shrink-0">
+            <BrainCircuit className="text-ciatos-navy" size={48} />
+         </div>
+         <div className="relative z-10">
+            <h4 className="text-ciatos-gold font-black text-[10px] uppercase tracking-[0.4em] mb-3">Advisor: Lidiane, Inteligência de Curadoria</h4>
+            <p className="text-xl font-medium italic leading-relaxed text-gray-200">
+               "Lidiane, identifiquei **3 candidatos com match acima de 90%** para a vaga do Cliente **Alpha S/A**. Recomendo movê-los para Entrevista para garantir a receita do mês."
+            </p>
+         </div>
+         <button 
+           onClick={() => setActiveTab('triagem')}
+           className="px-10 py-4 bg-white text-ciatos-navy rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-ciatos-gold transition-all relative z-10 whitespace-nowrap"
+         >
+           Avaliar Agora
+         </button>
+      </div>
+
+      <div className="flex gap-10 border-b border-gray-100 px-6 overflow-x-auto">
+        <TabBtn label="Painel de Vagas (Custo vs Receita)" count={MOCK_JOBS.length} active={activeTab === 'vagas'} onClick={() => setActiveTab('vagas')} />
+        <TabBtn label="Pipeline de Triagem IA" count={MOCK_CANDIDATES.length} active={activeTab === 'triagem'} onClick={() => setActiveTab('triagem')} />
       </div>
 
       {activeTab === 'vagas' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {MOCK_JOBS.map(job => (
-            <JobCard key={job.id} job={job} onCopyLink={() => copyToClipboard(`https://recrutamento.ciatos.com.br/vaga/${job.id}`)} />
+            <div key={job.id} className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm hover:border-ciatos-gold/30 transition-all group overflow-hidden relative">
+               <div className="flex justify-between items-start mb-10">
+                  <div>
+                     <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest mb-4 inline-block ${
+                        job.category.includes('Receita') ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600 border border-slate-200'
+                     }`}>Vaga {job.category}</span>
+                     <h3 className="text-2xl font-black text-ciatos-navy tracking-tight leading-tight">{job.title}</h3>
+                     <p className="text-sm font-bold text-gray-400 uppercase mt-1 italic">{job.unit}</p>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-3xl font-black text-ciatos-navy">{job.applicants}</p>
+                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Candidatos</p>
+                  </div>
+               </div>
+               
+               <div className="grid grid-cols-3 gap-6 mb-10">
+                  <JobStat label="Tipo" value={job.type} />
+                  <JobStat label="Status" value={job.status} />
+                  <JobStat label="Fee Estimado" value={job.fee} color={job.fee !== 'N/A' ? 'text-emerald-600' : 'text-gray-400'} />
+               </div>
+
+               <div className="flex justify-between items-center pt-10 border-t border-gray-50">
+                  <button className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:text-ciatos-gold transition-all"><Link2 size={20} /></button>
+                  <button onClick={() => navigate('/resumes')} className="text-xs font-black text-ciatos-gold uppercase tracking-widest flex items-center gap-3 group-hover:gap-5 transition-all">Ver Curadoria IA <ChevronRight size={18} /></button>
+               </div>
+            </div>
           ))}
         </div>
       ) : (
-        <CandidatesTable candidates={MOCK_CANDIDATES} />
+        <div className="bg-white rounded-[4rem] border border-gray-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4">
+           <div className="p-8 bg-slate-50/50 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-xs font-black text-ciatos-navy uppercase tracking-widest flex items-center gap-3"><LayoutGrid size={18}/> Talentos em Alta Aderência</h3>
+              <div className="flex gap-4">
+                 <button className="px-5 py-2.5 bg-white border border-gray-100 rounded-xl text-[9px] font-black text-gray-400 uppercase tracking-widest">Filtrar por Match</button>
+              </div>
+           </div>
+           <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                 <thead className="bg-slate-50/50">
+                    <tr>
+                       <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Candidato</th>
+                       <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Vaga / Unidade</th>
+                       <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Match IA</th>
+                       <th className="px-10 py-6">Ações Rápidas</th>
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-100">
+                    {MOCK_CANDIDATES.map(cand => (
+                       <tr key={cand.id} className="hover:bg-gray-50/50 transition-all group">
+                          <td className="px-10 py-8">
+                             <div className="flex items-center gap-5">
+                                <div className="w-14 h-14 rounded-2xl ciatos-navy text-ciatos-gold flex items-center justify-center font-black text-lg">{cand.name[0]}</div>
+                                <div>
+                                   <p className="text-base font-black text-ciatos-navy leading-none">{cand.name}</p>
+                                   <p className="text-[10px] text-gray-400 font-bold uppercase mt-1.5">{cand.source}</p>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="px-10 py-8">
+                             <p className="text-sm font-bold text-gray-700">{cand.position}</p>
+                             <p className="text-[10px] font-black text-ciatos-gold uppercase">{cand.unit}</p>
+                          </td>
+                          <td className="px-10 py-8 text-center">
+                             <div className={`text-2xl font-black ${cand.matchScore >= 90 ? 'text-emerald-600' : 'text-ciatos-gold'}`}>
+                                {cand.matchScore}%
+                             </div>
+                          </td>
+                          <td className="px-10 py-8 text-right">
+                             <div className="flex justify-end gap-3">
+                                <button className="px-5 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[9px] font-black uppercase hover:text-red-500 transition-all">Banco</button>
+                                <button className="px-8 py-2.5 bg-ciatos-navy text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 shadow-lg">
+                                   <UserCheck size={14} /> Entrevista
+                                </button>
+                             </div>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
+              </table>
+           </div>
+        </div>
       )}
 
+      {/* MODAL: NOVA VAGA (Custo vs Receita) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-ciatos-navy/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-6xl rounded-[3rem] shadow-2xl overflow-hidden flex h-[85vh]">
-             <div className="flex-1 p-12 overflow-y-auto custom-scrollbar">
-                <div className="flex justify-between items-start mb-12">
-                   <div>
-                      <h3 className="text-3xl font-black text-ciatos-navy">Abertura de Requisição</h3>
-                      <p className="text-sm text-gray-400 mt-2 font-medium italic">Advisor auxiliando na criação de uma vaga persuasiva e técnica.</p>
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-ciatos-navy/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-4xl rounded-[4rem] shadow-2xl overflow-hidden p-14">
+             <div className="flex justify-between items-start mb-12">
+                <div>
+                   <h3 className="text-3xl font-black text-ciatos-navy uppercase tracking-tight">Nova Requisição Estratégica</h3>
+                   <p className="text-sm text-gray-400 mt-1 font-medium italic">Selecione o modelo de faturamento e governança da vaga.</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="p-3 text-gray-300 hover:text-red-500 transition-all"><X size={28}/></button>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+                <button 
+                  onClick={() => setVagaForm({...vagaForm, category: 'Interna', type: 'Grupo Ciatos'})}
+                  className={`p-12 rounded-[3rem] border-2 flex flex-col items-center gap-8 transition-all ${vagaForm.category === 'Interna' ? 'border-ciatos-gold bg-ciatos-gold/5 shadow-2xl scale-105' : 'border-gray-100 opacity-50'}`}
+                >
+                   <div className={`p-6 rounded-[2rem] ${vagaForm.category === 'Interna' ? 'bg-ciatos-gold text-ciatos-navy shadow-lg' : 'bg-gray-50 text-gray-400'}`}><Building2 size={48}/></div>
+                   <div className="text-center">
+                      <p className="text-xl font-black text-ciatos-navy uppercase">Grupo Ciatos</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Vaga Interna (Custo Operacional)</p>
                    </div>
-                   <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-gray-100 rounded-full text-gray-400 transition-all"><X size={28}/></button>
-                </div>
+                </button>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                   <FormGroup label="Empresa/Destino">
-                      <select 
-                        className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-ciatos-navy"
-                        value={vagaForm.type}
-                        onChange={(e) => setVagaForm({...vagaForm, type: e.target.value})}
-                      >
-                         <option>Grupo Ciatos</option>
-                         <option>Cliente Externo</option>
-                      </select>
-                   </FormGroup>
-                   <FormGroup label="Cargo">
-                      <input 
-                        type="text" 
-                        className="w-full p-4 bg-white border border-gray-100 rounded-2xl text-xs font-bold"
-                        value={vagaForm.role}
-                        onChange={(e) => setVagaForm({...vagaForm, role: e.target.value})}
-                      />
-                   </FormGroup>
-                   <FormGroup label="Senioridade">
-                      <select className="w-full p-4 bg-white border border-gray-100 rounded-2xl text-xs font-bold" value={vagaForm.senioridade} onChange={(e) => setVagaForm({...vagaForm, senioridade: e.target.value})}>
-                         <option>Estágio</option><option>Júnior</option><option>Pleno</option><option>Sênior</option><option>Especialista</option>
-                      </select>
-                   </FormGroup>
-                   <FormGroup label="Modelo">
-                      <select className="w-full p-4 bg-white border border-gray-100 rounded-2xl text-xs font-bold" value={vagaForm.modelo} onChange={(e) => setVagaForm({...vagaForm, modelo: e.target.value})}>
-                         <option>Presencial</option><option>Híbrido</option><option>Remoto</option>
-                      </select>
-                   </FormGroup>
-                </div>
-
-                <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-gray-100 mb-10">
-                   <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center gap-4">
-                         <div className="p-3 bg-ciatos-gold rounded-2xl shadow-xl shadow-amber-600/20">
-                            <BrainCircuit className="text-ciatos-navy" size={24} />
-                         </div>
-                         <h4 className="font-black text-ciatos-navy uppercase tracking-[0.2em] text-[10px]">Ciatos Recruitment Advisor</h4>
-                      </div>
-                      <button 
-                        onClick={handleRequestJobAi}
-                        disabled={!vagaForm.role || aiLoading}
-                        className="flex items-center gap-3 px-8 py-3 bg-ciatos-navy text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50 shadow-lg"
-                      >
-                         {aiLoading ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                         Estruturar com IA
-                      </button>
+                <button 
+                  onClick={() => setVagaForm({...vagaForm, category: 'Externa', type: 'Cliente Externo'})}
+                  className={`p-12 rounded-[3rem] border-2 flex flex-col items-center gap-8 transition-all ${vagaForm.category === 'Externa' ? 'border-emerald-500 bg-emerald-50 shadow-2xl scale-105' : 'border-gray-100 opacity-50'}`}
+                >
+                   <div className={`p-6 rounded-[2rem] ${vagaForm.category === 'Externa' ? 'bg-emerald-500 text-white shadow-lg' : 'bg-gray-50 text-gray-400'}`}><Handshake size={48}/></div>
+                   <div className="text-center">
+                      <p className="text-xl font-black text-emerald-900 uppercase">Faturamento Externo</p>
+                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-2">Recrutamento Especializado (Receita)</p>
                    </div>
+                </button>
+             </div>
 
-                   {aiVagaData ? (
-                     <div className="space-y-6">
-                        <div className="flex gap-4 border-b border-gray-200 pb-2">
-                           <button onClick={() => setActiveAiTab('visual')} className={`whitespace-nowrap text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-t-xl transition-all ${activeAiTab === 'visual' ? 'bg-white border-x border-t border-gray-200 text-ciatos-gold' : 'text-gray-400'}`}>Visual</button>
-                           <button onClick={() => setActiveAiTab('linkedin')} className={`whitespace-nowrap text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-t-xl transition-all ${activeAiTab === 'linkedin' ? 'bg-white border-x border-t border-gray-200 text-ciatos-gold' : 'text-gray-400'}`}>Copy LinkedIn</button>
-                           <button onClick={() => setActiveAiTab('screening')} className={`whitespace-nowrap text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-t-xl transition-all ${activeAiTab === 'screening' ? 'bg-white border-x border-t border-gray-200 text-emerald-600' : 'text-gray-400'}`}>Triagem Técnica</button>
-                        </div>
+             <div className="space-y-6 mb-12">
+                <FormGroup label="Título do Cargo / Vaga">
+                   <input type="text" placeholder="Ex: Analista Fiscal Sênior..." className="w-full p-6 bg-gray-50 border border-gray-100 rounded-3xl text-sm font-bold shadow-inner" />
+                </FormGroup>
+                {vagaForm.category === 'Externa' && (
+                  <FormGroup label="Valor do Fee (Faturamento)">
+                    <div className="relative">
+                       <DollarSign className="absolute left-6 top-6 text-emerald-600" size={20} />
+                       <input type="text" placeholder="R$ 0,00" className="w-full pl-16 pr-8 py-6 bg-emerald-50 border border-emerald-100 rounded-3xl text-sm font-bold text-emerald-900" />
+                    </div>
+                  </FormGroup>
+                )}
+             </div>
 
-                        <div className="p-8 bg-white rounded-3xl border border-gray-100 shadow-xl overflow-y-auto max-h-[400px]">
-                           {activeAiTab === 'visual' && <div className="prose prose-sm max-w-none font-medium text-gray-700 whitespace-pre-wrap">{aiVagaData}</div>}
-                           {activeAiTab === 'linkedin' && (
-                             <div className="relative">
-                                <button onClick={() => copyToClipboard(aiVagaData)} className="absolute top-0 right-0 p-2 text-gray-400 hover:text-ciatos-gold"><Copy size={16}/></button>
-                                <div className="p-6 bg-slate-50 rounded-2xl border border-dashed border-gray-200 text-sm italic leading-relaxed whitespace-pre-wrap">{aiVagaData}</div>
-                             </div>
-                           )}
-                           {activeAiTab === 'screening' && (
-                             <div className="space-y-6">
-                                {aiScreeningData ? aiScreeningData.split('\n').filter(l => l.match(/^\d\./)).map((q, i) => (
-                                  <div key={i} className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-xs font-bold text-emerald-900">{q}</div>
-                                )) : 'Gerando filtros de triagem...'}
-                             </div>
-                           )}
-                        </div>
-                     </div>
-                   ) : (
-                     <div className="text-center py-24 opacity-30 flex flex-col items-center">
-                        <BarChart3 size={64} className="mb-6 text-gray-300" />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Aguardando estruturação do Advisor...</p>
-                     </div>
-                   )}
-                </div>
-
-                <div className="flex gap-4">
-                   <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase tracking-widest text-[10px]">Cancelar</button>
-                   <button className="flex-1 py-5 ciatos-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl">Publicar e Gerar Link</button>
-                </div>
+             <div className="flex gap-6">
+                <button onClick={() => setIsModalOpen(false)} className="flex-1 py-6 bg-gray-100 text-gray-500 rounded-3xl font-black uppercase tracking-widest text-[11px]">Cancelar</button>
+                <button className="flex-[2] py-6 ciatos-navy text-white rounded-3xl font-black uppercase tracking-widest text-[11px] shadow-2xl flex items-center justify-center gap-3">
+                   <Plus size={20} /> Publicar Vaga & Gerar Link
+                </button>
              </div>
           </div>
         </div>
@@ -233,81 +254,15 @@ const Recruitment: React.FC = () => {
 };
 
 const TabBtn = ({ label, count, active, onClick }: any) => (
-  <button onClick={onClick} className={`pb-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${active ? 'text-ciatos-gold border-b-2 border-ciatos-gold' : 'text-gray-400'}`}>
-    {label} <span className={`px-2 py-0.5 rounded-full text-[8px] border ${active ? 'bg-ciatos-gold/10 border-ciatos-gold text-ciatos-gold' : 'bg-gray-50 border-gray-100'}`}>{count}</span>
+  <button onClick={onClick} className={`pb-6 text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-3 whitespace-nowrap ${active ? 'text-ciatos-gold border-b-2 border-ciatos-gold' : 'text-gray-400 hover:text-ciatos-navy'}`}>
+    {label} <span className={`px-2.5 py-0.5 rounded-full text-[9px] border ${active ? 'bg-ciatos-gold/10 border-ciatos-gold text-ciatos-gold' : 'bg-gray-50 border-gray-100'}`}>{count}</span>
   </button>
 );
 
-const JobCard = ({ job, onCopyLink }: any) => (
-  <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm hover:border-ciatos-gold/30 transition-all group relative overflow-hidden">
-    <div className="flex justify-between items-start mb-8">
-       <div>
-          <div className="flex items-center gap-2 mb-2">
-             <Building2 size={12} className="text-ciatos-gold" />
-             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{job.type}</span>
-          </div>
-          <h3 className="text-2xl font-black text-ciatos-navy tracking-tight">{job.title}</h3>
-          <p className="text-sm text-gray-400 font-bold uppercase tracking-tighter">{job.department} • {job.seniority}</p>
-       </div>
-       <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black px-4 py-1.5 rounded-full border border-emerald-100 uppercase">{job.status}</span>
-    </div>
-    
-    <div className="flex items-center gap-6 mb-8 p-4 bg-slate-50 rounded-2xl border border-gray-100">
-       <div className="flex flex-col">
-          <span className="text-[8px] font-black text-gray-400 uppercase">Candidatos</span>
-          <span className="text-xl font-black text-ciatos-navy">{job.applicants}</span>
-       </div>
-       <div className="h-8 w-px bg-gray-200" />
-       <div className="flex flex-col">
-          <span className="text-[8px] font-black text-gray-400 uppercase">Conversão</span>
-          <span className="text-xl font-black text-emerald-600">92%</span>
-       </div>
-    </div>
-
-    <div className="flex justify-between items-center pt-8 border-t border-gray-100">
-       <button onClick={onCopyLink} className="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:text-ciatos-gold transition-all"><Link2 size={18} /></button>
-       <button className="text-xs font-black text-ciatos-gold uppercase tracking-widest flex items-center gap-2 group-hover:gap-4 transition-all">Ver Pipeline <ChevronRight size={16} /></button>
-    </div>
-  </div>
-);
-
-const CandidatesTable = ({ candidates }: any) => (
-  <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden">
-    <table className="w-full text-left">
-      <thead className="bg-slate-50/50">
-        <tr>
-          <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Candidato</th>
-          <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Match Competências (IA)</th>
-          <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-          <th className="px-10 py-6"></th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-100">
-        {candidates.map((cand: any) => (
-          <tr key={cand.id} className="hover:bg-gray-50/50 transition-all group">
-            <td className="px-10 py-8">
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center font-black text-xl">{cand.name[0]}</div>
-                <div>
-                  <p className="text-base font-black text-ciatos-navy">{cand.name}</p>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">{cand.position}</p>
-                </div>
-              </div>
-            </td>
-            <td className="px-10 py-8">
-              <div className="flex items-center gap-4">
-                 <div className={`p-3 rounded-xl font-black text-sm ${cand.matchScore > 90 ? 'bg-emerald-50 text-emerald-600' : 'bg-ciatos-gold/10 text-ciatos-gold'}`}>{cand.matchScore}%</div>
-                 <div className="flex-1 max-w-[250px]">
-                    <p className="text-[9px] text-gray-500 font-medium italic leading-tight line-clamp-2">"{cand.behavioralAlert}"</p>
-                 </div>
-              </div>
-            </td>
-            <td className="px-10 py-8"><span className="px-4 py-1.5 bg-blue-50 text-blue-700 text-[10px] font-black rounded-lg border border-blue-100 uppercase">{cand.stage}</span></td>
-            <td className="px-10 py-8 text-right"><button className="p-3 text-gray-300 hover:text-ciatos-gold transition-colors"><ChevronRight size={24}/></button></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+const JobStat = ({ label, value, color = "text-ciatos-navy" }: any) => (
+  <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-50">
+     <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
+     <p className={`text-xs font-bold truncate ${color}`}>{value}</p>
   </div>
 );
 
